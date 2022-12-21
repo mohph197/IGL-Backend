@@ -1,0 +1,8 @@
+flask
+google-auth
+google-auth-oauthlib
+oauthlib
+pathlib
+vendor
+requests
+requests-oauthlib
