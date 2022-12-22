@@ -4,13 +4,14 @@ from flask import Blueprint,session, abort, redirect, request
 from google.oauth2 import id_token
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from auth import flow
 
-def auth(flow):
+def auth():
     authorization_url, state = flow.authorization_url()  #asking the flow class for the authorization (login) url
     session["state"] = state
     return redirect(authorization_url)
 
-def callback(flow):
+def callback():
     flow.fetch_token(authorization_response=request.url)
 
     if not session["state"] == request.args["state"]:
