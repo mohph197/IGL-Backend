@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Blueprint,session, abort, redirect, request
+from flask import session, abort, redirect, request
 from google.oauth2 import id_token
 from pip._vendor import cachecontrol
 import google.auth.transport.requests

@@ -6,3 +6,6 @@ pathlib
 vendor
 requests
 requests-oauthlib
+Flask-SQLAlchemy
+mysql-connector-python
+python-dotenv
