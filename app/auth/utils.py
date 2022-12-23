@@ -5,8 +5,11 @@ from google.oauth2 import id_token
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from app.auth import flow
+from app import db
+from app.auth.models import *
 
 def auth():
+    print(db.engine.url)
     authorization_url, state = flow.authorization_url()  #asking the flow class for the authorization (login) url
     session["state"] = state
     return redirect(authorization_url)
@@ -30,8 +33,18 @@ def callback():
 
     session["google_id"] = id_info.get("sub")  #defing the results to show on the page
     session["name"] = id_info.get("name")
-    
-    return redirect("/protected_area")  #the final page where the authorized users will end up
+
+    new_user = User(email=id_info['email'],prenom=id_info['given_name'],nom=id_info['family_name'],role='U')
+    db.session.add(new_user)
+    db.session.commit()
+
+    # return redirect("/protected_area")  #the final page where the authorized users will end up
+    return {
+        'email': id_info['email'],
+        'prenom': id_info['given_name'],
+        'nom': id_info['family_name'],
+        'role': 'U'
+    }
 
 def logout():
     session.clear()
