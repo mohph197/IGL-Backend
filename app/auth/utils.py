@@ -1,18 +1,44 @@
 import os
 import requests
-from flask import session, abort, redirect, request
+from flask import session, abort, redirect, request, jsonify
 from google.oauth2 import id_token
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from app.auth import flow
-from app import db
+from app import db,login_is_required
 from app.auth.models import *
 
+def insertUserToDb(email,prenom,nom,role):
+    try:
+        user = db.session.query(User).filter_by(email=email).first()
+
+        if user == None:
+            new_user = User(email=email,prenom=prenom,nom=nom,role=role)
+            db.session.add(new_user)
+            db.session.commit()
+            return jsonify({
+                "email" : email,
+                "message": "User created"
+            }), 200
+        else:
+            return jsonify({
+                "email" : email,
+                "message": "User already exists"
+            }), 200
+    except Exception as e:
+        return jsonify({
+                "error" : e.args,
+                "message": "Error"
+            }), 500
+
 def auth():
-    print(db.engine.url)
     authorization_url, state = flow.authorization_url()  #asking the flow class for the authorization (login) url
     session["state"] = state
     return redirect(authorization_url)
+
+@login_is_required
+def me():
+    return session['user_info']
 
 def callback():
     flow.fetch_token(authorization_response=request.url)
@@ -32,20 +58,19 @@ def callback():
     )
 
     session["google_id"] = id_info.get("sub")  #defing the results to show on the page
-    session["name"] = id_info.get("name")
-
-    new_user = User(email=id_info['email'],prenom=id_info['given_name'],nom=id_info['family_name'],role='U')
-    db.session.add(new_user)
-    db.session.commit()
-
-    # return redirect("/protected_area")  #the final page where the authorized users will end up
-    return {
-        'email': id_info['email'],
-        'prenom': id_info['given_name'],
-        'nom': id_info['family_name'],
-        'role': 'U'
+    session["user_info"] = {
+        "email":id_info['email'],
+        "firstName":id_info['given_name'],
+        "lastName":id_info['family_name'],
+        "role":'U'
     }
+
+    result = insertUserToDb(email=id_info['email'],prenom=id_info['given_name'],nom=id_info['family_name'],role='U')
+
+    return result
 
 def logout():
     session.clear()
-    return redirect("/")
+    return jsonify({
+        "message": "Successfully logged out"
+    }), 200

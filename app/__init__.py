@@ -1,9 +1,18 @@
 import os
-from flask import Flask
+from flask import Flask,session,abort
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 db = SQLAlchemy()
+
+def login_is_required(function):  #a function to check if the user is authorized or not
+    def wrapper(*args, **kwargs):
+        if "google_id" not in session:  #authorization required
+            return abort(401)
+        else:
+            return function()
+
+    return wrapper
 
 def create_app():
     load_dotenv()
