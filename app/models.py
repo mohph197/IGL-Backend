@@ -7,20 +7,40 @@ favorites = db.Table('favori',
 
 class User(db.Model):
     __tablename__ = 'utilisateur'
-    __table_args__ = {'extend_existing': True} 
     email = db.Column(db.String(100), primary_key=True, nullable=False)
     nom = db.Column(db.String(20), nullable=False)
     prenom = db.Column(db.String(20), nullable=False)
     role = db.Column(db.String(1),default='U',nullable=False)
 
     annonces_poste = db.relationship('Announcement', backref='auteur', lazy='dynamic')
-    annonces_favoris = db.relationship('Announcement', secondary=favorites, backref='fans', lazy='dynamic')
+    annonces_favoris = db.relationship('Announcement', secondary=favorites, back_populates='fans', lazy='dynamic')
     messages_envoyes = db.relationship('Message', backref='emetteur', lazy='dynamic', foreign_keys='Message.emetteur_email')
     messages_recus = db.relationship('Message', backref='destinataire', lazy='dynamic', foreign_keys='Message.destinataire_email')
     contact_info = db.relationship('ContactInfo', backref='utilisateur', uselist=False)
 
     def __repr__(self):
         return f'<User {self.email}>'
+
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'nom': self.nom,
+            'prenom': self.prenom,
+            'role': self.role,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'email': self.email,
+            'nom': self.nom,
+            'prenom': self.prenom,
+            'role': self.role,
+            'annonces_poste': [annonce.to_dict_recursive() for annonce in self.annonces_poste],
+            'annonces_favoris': [annonce.to_dict_recursive() for annonce in self.annonces_favoris],
+            'messages_envoyes': [message.to_dict_recursive() for message in self.messages_envoyes],
+            'messages_recus': [message.to_dict_recursive() for message in self.messages_recus],
+            'contact_info': self.contact_info.to_dict_recursive()
+        }
 
 class Announcement(db.Model):
     __tablename__ = 'annonce'
@@ -31,14 +51,40 @@ class Announcement(db.Model):
     prix = db.Column(db.Float, nullable=False)
     categorie = db.Column(db.Enum('Vente','Echange','Location','Location pour vacances'), nullable=False)
     
-    auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)
-    localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)
-    contactinfo_email = db.Column(db.String(100), db.ForeignKey('contactinfo.email'), nullable=False)
+    auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)            # auteur
+    localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)               # localisation
+    contactinfo_email = db.Column(db.String(100), db.ForeignKey('contactinfo.email'), nullable=False)       # contactinfo
 
+    fans = db.relationship('User', secondary=favorites, back_populates='annonces_favoris', lazy='dynamic')
     photos = db.relationship('Picture', backref='annonce', lazy='dynamic')
 
     def __repr__(self):
         return f'<Announcement {self.id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'surface': self.surface,
+            'description': self.description,
+            'prix': self.prix,
+            'categorie': self.categorie,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'surface': self.surface,
+            'description': self.description,
+            'prix': self.prix,
+            'categorie': self.categorie,
+            'auteur': self.auteur.to_dict_recursive(),
+            'localisation': self.localisation.to_dict_recursive(),
+            'contactinfo': self.contactinfo.to_dict_recursive(),
+            'fans': [fan.to_dict_recursive() for fan in self.fans],
+            'photos': [photo.to_dict_recursive() for photo in self.photos]
+        }
 
 class Location(db.Model):
     __tablename__ = 'localisation'
@@ -51,6 +97,23 @@ class Location(db.Model):
 
     def __repr__(self):
         return f'<Location {self.id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'wilaya': self.wilaya,
+            'commune': self.commune,
+            'adresse': self.adresse,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'id': self.id,
+            'wilaya': self.wilaya,
+            'commune': self.commune,
+            'adresse': self.adresse,
+            'annonces': [annonce.to_dict_recursive() for annonce in self.annonces]
+        }
 
 class ContactInfo(db.Model):
     __tablename__ = 'contactinfo'
@@ -65,16 +128,50 @@ class ContactInfo(db.Model):
     def __repr__(self):
         return f'<ContactInfo {self.email}>'
 
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'nom': self.nom,
+            'prenom': self.prenom,
+            'address': self.address,
+            'tel': self.tel,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'email': self.email,
+            'nom': self.nom,
+            'prenom': self.prenom,
+            'address': self.address,
+            'tel': self.tel,
+            'annonces': [annonce.to_dict_recursive() for annonce in self.annonces]
+        }
+
 class Picture(db.Model):
     __tablename__ = 'photo'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     nom = db.Column(db.Text, nullable=False)
     chemin = db.Column(db.Text, nullable=False)
 
-    annonce_id = db.Column(db.Integer, db.ForeignKey('annonce.id'), nullable=False)
+    annonce_id = db.Column(db.Integer, db.ForeignKey('annonce.id'), nullable=False)     # annonce
 
     def __repr__(self):
         return f'<Picture {self.id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nom': self.nom,
+            'chemin': self.chemin,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'id': self.id,
+            'nom': self.nom,
+            'chemin': self.chemin,
+            'annonce': self.annonce.to_dict_recursive()
+        }
 
 class Message(db.Model):
     __tablename__ = 'message'
@@ -82,8 +179,24 @@ class Message(db.Model):
     objet = db.Column(db.Text, nullable=False)
     contenu = db.Column(db.Text, nullable=False)
 
-    emetteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)
-    destinataire_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)
+    emetteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # emetteur
+    destinataire_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)      # destinataire
 
     def __repr__(self):
         return f'<Message {self.id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'objet': self.objet,
+            'contenu': self.contenu,
+        }
+
+    def to_dict_recursive(self):
+        return {
+            'id': self.id,
+            'objet': self.objet,
+            'contenu': self.contenu,
+            'emetteur': self.emetteur.to_dict_recursive(),
+            'destinataire': self.destinataire.to_dict_recursive()
+        }

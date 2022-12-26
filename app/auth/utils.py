@@ -73,14 +73,9 @@ def me():
         bearer_token = authorization_header.split(' ')[1]
         login_info = login_is_required(bearer_token)
         if login_info:
-            user = db.session.query(User).filter_by(email=login_info["email"]).first()
+            user = User.query.get(login_info["email"])
             if user:
-                return jsonify({
-                    "email":user.email,
-                    "firstName":user.prenom,
-                    "lastName":user.nom,
-                    "role":user.role
-                }),200
+                return jsonify(user.to_dict()),200
             else:
                 return jsonify({
                     "error":"User not found",
