@@ -6,7 +6,7 @@ from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from app.auth import flow
 from app import db,login_is_required
-from app.auth.models import *
+from app.models import *
 import jwt
 import json
 

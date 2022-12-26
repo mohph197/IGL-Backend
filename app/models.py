@@ -7,6 +7,7 @@ favorites = db.Table('favori',
 
 class User(db.Model):
     __tablename__ = 'utilisateur'
+    __table_args__ = {'extend_existing': True} 
     email = db.Column(db.String(100), primary_key=True, nullable=False)
     nom = db.Column(db.String(20), nullable=False)
     prenom = db.Column(db.String(20), nullable=False)
@@ -14,8 +15,9 @@ class User(db.Model):
 
     annonces_poste = db.relationship('Announcement', backref='auteur', lazy='dynamic')
     annonces_favoris = db.relationship('Announcement', secondary=favorites, backref='fans', lazy='dynamic')
-    messages_envoyes = db.relationship('Message', backref='emetteur', lazy='dynamic', foreign_keys='message.emetteur_email')
-    messages_recus = db.relationship('Message', backref='destinataire', lazy='dynamic', foreign_keys='message.destinataire_email')
+    messages_envoyes = db.relationship('Message', backref='emetteur', lazy='dynamic', foreign_keys='Message.emetteur_email')
+    messages_recus = db.relationship('Message', backref='destinataire', lazy='dynamic', foreign_keys='Message.destinataire_email')
+    contact_info = db.relationship('ContactInfo', backref='utilisateur', uselist=False)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -30,7 +32,7 @@ class Announcement(db.Model):
     categorie = db.Column(db.Enum('Vente','Echange','Location','Location pour vacances'), nullable=False)
     
     auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)
-    localisatio_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)
+    localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)
     contactinfo_email = db.Column(db.String(100), db.ForeignKey('contactinfo.email'), nullable=False)
 
     photos = db.relationship('Picture', backref='annonce', lazy='dynamic')
@@ -52,7 +54,7 @@ class Location(db.Model):
 
 class ContactInfo(db.Model):
     __tablename__ = 'contactinfo'
-    email = db.Column(db.String(100), primary_key=True, nullable=False)
+    email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), primary_key=True, nullable=False)
     nom = db.Column(db.String(20), nullable=False)
     prenom = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text, nullable=False)

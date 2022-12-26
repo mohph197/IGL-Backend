@@ -1,6 +1,7 @@
 flask
 google-auth
 google-auth-oauthlib
+mysqlclient
 oauthlib
 pathlib
 vendor
