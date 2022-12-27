@@ -20,6 +20,7 @@ def create_app():
     app = Flask("TP_IGL")  # Naming our application
     app.secret_key = os.environ['SECRET_KEY']  #It is necessary to set a password when dealing with OAuth 2.0
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+    app.config['UPLOAD_FOLDER'] = 'storage/pictures'
     CORS(app)
     
     db.init_app(app)
