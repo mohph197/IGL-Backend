@@ -1,10 +1,8 @@
 from app.models import *
-from app import get_auth_user
+from app.main import get_auth_user
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
-
-
 
 def index():
     user = get_auth_user()
@@ -16,7 +14,24 @@ def index():
     return jsonify([announcement.to_dict() for announcement in user.annonces_poste.all()]),200
 
 def all_announcements():
-    return ''
+    page = request.args.get('page')
+    if page and page.isdigit():
+        page = int(page)
+    else:
+        page = 1
+        
+    per_page = 5
+    offset = (page - 1) * per_page
+    total_count = Announcement.query.count()
+    annonces = Announcement.query.limit(per_page).offset(offset).all()
+    num_pages = total_count // per_page + (total_count % per_page > 0)
+    return jsonify({
+        "page":page,
+        "per_page":per_page,
+        "total_count":total_count,
+        "num_pages":num_pages,
+        "annonces":[annonce.to_dict() for annonce in annonces]
+    }),200
 
 def announcement(announcement_id):
     user = get_auth_user()
@@ -42,9 +57,6 @@ def create_announcement():
             "error":"Unauthorized",
             "message":"Error"
         }),401
-
-    
-
     try:
         location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"), adresse=request.form.get("adresse")).first()
         if not location:
