@@ -1,5 +1,6 @@
 import os
-from flask import Flask,session,abort
+from flask import Flask,session,abort,request
+from app.models import *
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_cors import CORS
@@ -13,6 +14,16 @@ def login_is_required(token):  #a function to check if the user is authorized or
         return decoded
     except:
         return None
+
+def get_auth_user():
+    authorization_header = request.headers.get('Authorization')
+    if not authorization_header:
+        return None
+    bearer_token = authorization_header.split(' ')[1]
+    login_info = login_is_required(bearer_token)
+    if not login_info:
+        return None
+    return User.query.get(login_info["email"])
 
 def create_app():
     load_dotenv()

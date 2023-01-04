@@ -1,18 +1,10 @@
 from app.models import *
-from app import login_is_required
+from app import get_auth_user
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
 
-def get_auth_user():
-    authorization_header = request.headers.get('Authorization')
-    if not authorization_header:
-        return None
-    bearer_token = authorization_header.split(' ')[1]
-    login_info = login_is_required(bearer_token)
-    if not login_info:
-        return None
-    return User.query.get(login_info["email"])
+
 
 def index():
     user = get_auth_user()
@@ -21,8 +13,10 @@ def index():
             "error":"Unauthorized",
             "message":"Error"
         }),401
-
     return jsonify([announcement.to_dict() for announcement in user.annonces_poste.all()]),200
+
+def all_announcements():
+    return ''
 
 def announcement(announcement_id):
     user = get_auth_user()
@@ -48,6 +42,8 @@ def create_announcement():
             "error":"Unauthorized",
             "message":"Error"
         }),401
+
+    
 
     try:
         location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"), adresse=request.form.get("adresse")).first()
@@ -91,10 +87,6 @@ def create_announcement():
 
     return jsonify(announcement.to_dict_with_relations()),201
 
-def edit_announcement(announcement_id):
-    # TODO: Implement this
-    return f"Edit Announcement {announcement_id}"
-
 def delete_announcement(announcement_id):
     user = get_auth_user()
     if not user:
@@ -110,6 +102,10 @@ def delete_announcement(announcement_id):
             "message":"Error"
         }),404
 
+    # Delete all the photos of annonce
+    for photo in annonce.photos.all():
+        os.remove(photo.chemin)
+        db.session.delete(photo)
     db.session.delete(annonce)
     db.session.commit()
 

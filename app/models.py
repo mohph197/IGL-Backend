@@ -11,7 +11,7 @@ class User(db.Model):
     nom = db.Column(db.String(20), nullable=False)
     prenom = db.Column(db.String(20), nullable=False)
     adresse = db.Column(db.Text)
-    tel = db.Column(db.String(20), nullable=False)
+    tel = db.Column(db.String(20))
     role = db.Column(db.String(1), default='U', nullable=False)
 
     annonces_poste = db.relationship('Announcement', backref='auteur', lazy='dynamic')
