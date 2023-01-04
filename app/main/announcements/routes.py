@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint,send_from_directory
 from app.main.announcements.utils import *
 
 bp = Blueprint("announcements", __name__)
@@ -22,3 +22,8 @@ def create_announcement_route():
 @bp.delete("/<int:announcement_id>/delete")
 def delete_announcement_route(announcement_id):
     return delete_announcement(announcement_id)
+
+@bp.route('/images/<path:filename>')
+def serve_image(filename):
+    print(filename)
+    return send_from_directory('storage/pictures', filename)
