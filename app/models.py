@@ -60,6 +60,7 @@ class Announcement(db.Model):
 
     fans = db.relationship('User', secondary=favorites, back_populates='annonces_favoris', lazy='dynamic')
     photos = db.relationship('Picture', backref='annonce', lazy='dynamic')
+    messages = db.relationship('Message', backref='annonce', lazy='dynamic')
 
     def __repr__(self):
         return f'<Announcement {self.id}>'
@@ -85,7 +86,8 @@ class Announcement(db.Model):
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
             'fans': [fan.to_dict() for fan in self.fans],
-            'photos': [photo.to_dict() for photo in self.photos]
+            'photos': [photo.to_dict() for photo in self.photos],
+            'messages': [message.to_dict() for message in self.messages]
         }
 
 class Location(db.Model):
@@ -151,6 +153,7 @@ class Message(db.Model):
 
     emetteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # emetteur
     destinataire_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)      # destinataire
+    annonce_id = db.Column(db.Integer, db.ForeignKey('annonce.id'), nullable=False)                         # annonce
 
     def __repr__(self):
         return f'<Message {self.id}>'
@@ -168,5 +171,6 @@ class Message(db.Model):
             'objet': self.objet,
             'contenu': self.contenu,
             'emetteur': self.emetteur.to_dict(),
-            'destinataire': self.destinataire.to_dict()
+            'destinataire': self.destinataire.to_dict(),
+            'annonce': self.annonce.to_dict()
         }
