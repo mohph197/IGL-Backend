@@ -78,7 +78,6 @@ class Announcement(db.Model):
             'categorie': self.categorie,
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
-            'fans': [fan.to_dict() for fan in self.fans],
             'photos': [photo.to_dict() for photo in self.photos],
             'messages': [message.to_dict() for message in self.messages]
         }

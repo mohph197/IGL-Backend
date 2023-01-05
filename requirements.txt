@@ -12,3 +12,4 @@ pymysql
 python-dotenv
 pyjwt
 flask_cors
+selenium
