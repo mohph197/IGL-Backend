@@ -68,7 +68,7 @@ def create_announcement():
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= date.today(), auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= date.today(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except:
