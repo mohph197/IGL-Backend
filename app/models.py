@@ -1,10 +1,5 @@
 from app import db
 
-favorites = db.Table('favori',
-    db.Column('annonce_id', db.Integer, db.ForeignKey('annonce.id')),
-    db.Column('utilisateur_email', db.String(100), db.ForeignKey('utilisateur.email'))
-)
-
 class User(db.Model):
     __tablename__ = 'utilisateur'
     email = db.Column(db.String(100), primary_key=True, nullable=False)
@@ -15,7 +10,6 @@ class User(db.Model):
     role = db.Column(db.String(1), default='U', nullable=False)
 
     annonces_poste = db.relationship('Announcement', backref='auteur', lazy='dynamic')
-    annonces_favoris = db.relationship('Announcement', secondary=favorites, back_populates='fans', lazy='dynamic')
     messages_envoyes = db.relationship('Message', backref='emetteur', lazy='dynamic', foreign_keys='Message.emetteur_email')
     messages_recus = db.relationship('Message', backref='destinataire', lazy='dynamic', foreign_keys='Message.destinataire_email')
 
@@ -58,7 +52,6 @@ class Announcement(db.Model):
     auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)            # auteur
     localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)               # localisation
 
-    fans = db.relationship('User', secondary=favorites, back_populates='annonces_favoris', lazy='dynamic')
     photos = db.relationship('Picture', backref='annonce', lazy='dynamic')
     messages = db.relationship('Message', backref='annonce', lazy='dynamic')
 
