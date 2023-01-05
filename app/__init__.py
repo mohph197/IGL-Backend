@@ -7,6 +7,13 @@ import jwt
 
 db = SQLAlchemy()
 
+def dictify(locals:dict, items:list[str]):
+    locals = locals.copy()
+    result = {}
+    for item in items:
+        result[item] = locals[item]
+    return result
+
 def login_is_required(token):  #a function to check if the user is authorized or not
     try:
         decoded = jwt.decode(token,os.environ['SECRET_KEY'],os.environ['JWT_ALGORITHM'])
@@ -21,6 +28,7 @@ def create_app():
     app.secret_key = os.environ['SECRET_KEY']  #It is necessary to set a password when dealing with OAuth 2.0
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
     app.config['UPLOAD_FOLDER'] = 'storage/pictures'
+    app.config['PAGINATION_PER_PAGE'] = 5
     CORS(app)
     
     db.init_app(app)

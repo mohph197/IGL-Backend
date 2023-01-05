@@ -1,5 +1,6 @@
 from app.models import *
 from app.main import get_auth_user
+from app.main.utils import paginate
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
@@ -11,26 +12,26 @@ def index():
             "error":"Unauthorized",
             "message":"Error"
         }),401
-    return jsonify([announcement.to_dict() for announcement in user.annonces_poste.all()]),200
+
+    results = paginate(user.annonces_poste)
+
+    return jsonify({
+        "page":results['page'],
+        "per_page":results['per_page'],
+        "total_count":results['total_count'],
+        "num_pages":results['num_pages'],
+        "annonces":[annonce.to_dict() for annonce in results['items']]
+    }),200
 
 def all_announcements():
-    page = request.args.get('page')
-    if page and page.isdigit():
-        page = int(page)
-    else:
-        page = 1
-        
-    per_page = 5
-    offset = (page - 1) * per_page
-    total_count = Announcement.query.count()
-    annonces:list[Announcement] = Announcement.query.limit(per_page).offset(offset).all()
-    num_pages = total_count // per_page + (total_count % per_page > 0)
+    results = paginate(Announcement.query)
+
     return jsonify({
-        "page":page,
-        "per_page":per_page,
-        "total_count":total_count,
-        "num_pages":num_pages,
-        "annonces":[annonce.to_dict() for annonce in annonces]
+        "page":results['page'],
+        "per_page":results['per_page'],
+        "total_count":results['total_count'],
+        "num_pages":results['num_pages'],
+        "annonces":[annonce.to_dict() for annonce in results['items']]
     }),200
 
 def announcement(announcement_id):
@@ -124,4 +125,24 @@ def delete_announcement(announcement_id):
 
     return jsonify({
         "message":"Announcement deleted successfully"
+    }),200
+
+def search():
+    query = request.args.get('q')
+    if not query:
+        return jsonify({
+            "error":"Query is required",
+            "message":"Error"
+        }),400
+        
+    results_query = Announcement.query.filter((Announcement.type.contains(query)) | Announcement.description.contains(query))
+
+    results = paginate(results_query)
+
+    return jsonify({
+        "page":results['page'],
+        "per_page":results['per_page'],
+        "total_count":results['total_count'],
+        "num_pages":results['num_pages'],
+        "annonces":[annonce.to_dict() for annonce in results['items']]
     }),200

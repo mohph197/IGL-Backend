@@ -22,3 +22,7 @@ def create_announcement_route():
 @bp.delete("/<int:announcement_id>/delete")
 def delete_announcement_route(announcement_id):
     return delete_announcement(announcement_id)
+
+@bp.get("/search")
+def search_route():
+    return search()
