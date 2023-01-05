@@ -35,7 +35,6 @@ class User(db.Model):
             'tel': self.tel,
             'role': self.role,
             'annonces_poste': [annonce.to_dict() for annonce in self.annonces_poste],
-            'annonces_favoris': [annonce.to_dict() for annonce in self.annonces_favoris],
             'messages_envoyes': [message.to_dict() for message in self.messages_envoyes],
             'messages_recus': [message.to_dict() for message in self.messages_recus],
         }
