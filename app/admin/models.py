@@ -1,3 +1,7 @@
+def format_date(date):
+        parts = date.split('-')
+        return '-'.join(parts[::-1])
+
 class AnnouncementObj:
     titre = None
     type = None
@@ -12,7 +16,7 @@ class AnnouncementObj:
     photos = []
 
     def __repr__(self):
-        return f'<Announcement Obj>'
+        return '<Announcement Obj>'
 
     def to_json(self):
         return {
@@ -25,6 +29,6 @@ class AnnouncementObj:
             'commune': self.commune,
             'adresse': self.adresse,
             'categorie': self.categorie,
-            'date_publication': self.date_publication,
+            'date_publication': format_date(self.date_publication),
             'photos': self.photos,
         }

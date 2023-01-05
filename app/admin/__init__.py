@@ -1,0 +1,1 @@
+annonces_algerie_url = "http://www.annonce-algerie.com/"
