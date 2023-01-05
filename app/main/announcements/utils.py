@@ -4,6 +4,7 @@ from app.main.utils import paginate
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
+from datetime import date
 
 def index():
     user = get_auth_user()
@@ -67,7 +68,7 @@ def create_announcement():
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication=request.form.get("date_publication") , auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= date.today(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except:
