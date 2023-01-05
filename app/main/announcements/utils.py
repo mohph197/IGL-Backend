@@ -13,15 +13,9 @@ def index():
             "message":"Error"
         }),401
 
-    results = paginate(user.annonces_poste)
-
-    return jsonify({
-        "page":results['page'],
-        "per_page":results['per_page'],
-        "total_count":results['total_count'],
-        "num_pages":results['num_pages'],
-        "annonces":[annonce.to_dict() for annonce in results['items']]
-    }),200
+    return jsonify(
+        [annonce.to_dict_with_relations() for annonce in user.annonces_poste]
+    ),200
 
 def all_announcements():
     results = paginate(Announcement.query)
@@ -31,7 +25,7 @@ def all_announcements():
         "per_page":results['per_page'],
         "total_count":results['total_count'],
         "num_pages":results['num_pages'],
-        "annonces":[annonce.to_dict() for annonce in results['items']]
+        "annonces":[annonce.to_dict_with_relations() for annonce in results['items']]
     }),200
 
 def announcement(announcement_id):
