@@ -23,7 +23,7 @@ def all_announcements():
     per_page = 5
     offset = (page - 1) * per_page
     total_count = Announcement.query.count()
-    annonces = Announcement.query.limit(per_page).offset(offset).all()
+    annonces:list[Announcement] = Announcement.query.limit(per_page).offset(offset).all()
     num_pages = total_count // per_page + (total_count % per_page > 0)
     return jsonify({
         "page":page,
@@ -41,7 +41,7 @@ def announcement(announcement_id):
             "message":"Error"
         }),401
 
-    announcement = user.annonces_poste.filter_by(id=announcement_id).first()
+    announcement:Announcement = user.annonces_poste.filter_by(id=announcement_id).first()
     if not announcement:
         return jsonify({
             "error":"Announcement not found",
@@ -57,6 +57,7 @@ def create_announcement():
             "error":"Unauthorized",
             "message":"Error"
         }),401
+
     try:
         location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"), adresse=request.form.get("adresse")).first()
         if not location:
@@ -107,7 +108,7 @@ def delete_announcement(announcement_id):
             "message":"Error"
         }),401
 
-    annonce = user.annonces_poste.filter_by(id=announcement_id).first()
+    annonce:Announcement = user.annonces_poste.filter_by(id=announcement_id).first()
     if not annonce:
         return jsonify({
             "error":"Announcement not found",

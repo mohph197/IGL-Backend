@@ -2,7 +2,7 @@ from flask import request
 from app.models import *
 from app import login_is_required
 
-def get_auth_user():
+def get_auth_user() -> User:
     authorization_header = request.headers.get('Authorization')
     if not authorization_header:
         return None
