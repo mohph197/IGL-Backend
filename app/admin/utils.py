@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
 from app.admin.models import AnnouncementObj
-from app.admin import annonces_algerie_url
+from app.admin import annonces_algerie_url,get_auth_admin
 
 def get_html(url):
     page = requests.get(url)
@@ -51,40 +51,48 @@ def get_infos(link):
     return announcement.to_json()
 
 def get_online():
-    page = '1'
-    if 'page' in request.args:
-        page = request.args.get('page')
+    admin = get_auth_admin()
+    if admin:
+        page = '1'
+        if 'page' in request.args:
+            page = request.args.get('page')
 
-    #Beginning of the script ================================================================================
-    sub_url = "AnnoncesImmobilier.asp"
+        #Beginning of the script ================================================================================
+        sub_url = "AnnoncesImmobilier.asp"
 
-    if len(sys.argv) > 0:
-        sub_url += "?rech_page_num="+str(sys.argv[0])
+        if len(sys.argv) > 0:
+            sub_url += "?rech_page_num="+str(sys.argv[0])
 
-    try:
-        soup = BeautifulSoup(get_html(annonces_algerie_url+sub_url), "html.parser")
-        items = soup.find_all(class_="Tableau1")
+        try:
+            soup = BeautifulSoup(get_html(annonces_algerie_url+sub_url), "html.parser")
+            items = soup.find_all(class_="Tableau1")
 
-        links = []
-        for item in items:
-            link = item.find_all("td")[7].find("a")["href"]
-            links.append(annonces_algerie_url+link)
-            get_infos(annonces_algerie_url+link)
+            links = []
+            for item in items:
+                link = item.find_all("td")[7].find("a")["href"]
+                links.append(annonces_algerie_url+link)
 
-        # This part use multi-threading to optimise execution time
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(get_infos, links))
-        
-        return jsonify({
-            'annonces' : results,
-            'page': page,
-            'annonces_per_page': 25,
-        }),200
+            # This part use multi-threading to optimise execution time
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                results = list(executor.map(get_infos, links))
+            
+            return jsonify({
+                'annonces' : results,
+                'page': page,
+                'annonces_per_page': 25,
+            }),200
 
-    except Exception as e:
+        except Exception as e:
+            return jsonify(
+                {
+                    'error': e.args,
+                    'message': 'Error',
+                }
+            ),500
+    else:
         return jsonify(
             {
-                'error': e.args,
-                'message': 'Error',
+                'error':'Unauthorized',
+                'message':'Error',
             }
-        ),500
+        ),403
