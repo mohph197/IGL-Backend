@@ -60,19 +60,20 @@ def create_announcement():
         }),401
 
     try:
-        location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"), adresse=request.form.get("adresse")).first()
+        location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune")).first()
         if not location:
-            location = Location(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"), adresse=request.form.get("adresse"))
+            location = Location(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"))
             db.session.add(location)
             db.session.commit()
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({
             "error":"Error while creating location",
             "message":"Error"
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), categorie=request.form.get("categorie"), auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except:

@@ -47,6 +47,7 @@ class Announcement(db.Model):
     surface = db.Column(db.Float)
     description = db.Column(db.Text)
     prix = db.Column(db.Float, nullable=False)
+    adresse = db.Column(db.Text, nullable=False)
     categorie = db.Column(db.Enum('Vente','Echange','Location','Location pour vacances'), nullable=False)
     
     auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)            # auteur
@@ -65,6 +66,7 @@ class Announcement(db.Model):
             'surface': self.surface,
             'description': self.description,
             'prix': self.prix,
+            'adresse': self.adresse,
             'categorie': self.categorie,
         }
 
@@ -75,10 +77,10 @@ class Announcement(db.Model):
             'surface': self.surface,
             'description': self.description,
             'prix': self.prix,
+            'adresse': self.adresse,
             'categorie': self.categorie,
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
-            'fans': [fan.to_dict() for fan in self.fans],
             'photos': [photo.to_dict() for photo in self.photos],
             'messages': [message.to_dict() for message in self.messages]
         }
@@ -86,9 +88,8 @@ class Announcement(db.Model):
 class Location(db.Model):
     __tablename__ = 'localisation'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    wilaya = db.Column(db.String(100))
-    commune = db.Column(db.String(100))
-    adresse = db.Column(db.Text, nullable=False)
+    wilaya = db.Column(db.String(100), nullable=False)
+    commune = db.Column(db.String(100), nullable=False)
 
     annonces = db.relationship('Announcement', backref='localisation', lazy='dynamic')
 
@@ -100,7 +101,6 @@ class Location(db.Model):
             'id': self.id,
             'wilaya': self.wilaya,
             'commune': self.commune,
-            'adresse': self.adresse,
         }
 
     def to_dict_with_relations(self):
@@ -108,7 +108,6 @@ class Location(db.Model):
             'id': self.id,
             'wilaya': self.wilaya,
             'commune': self.commune,
-            'adresse': self.adresse,
             'annonces': [annonce.to_dict() for annonce in self.annonces]
         }
 
