@@ -43,12 +43,14 @@ class User(db.Model):
 class Announcement(db.Model):
     __tablename__ = 'annonce'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
+    titre = db.Column(db.Text)
     type = db.Column(db.Text)
     surface = db.Column(db.Float)
     description = db.Column(db.Text)
     prix = db.Column(db.Float, nullable=False)
     adresse = db.Column(db.Text, nullable=False)
     categorie = db.Column(db.Enum('Vente','Echange','Location','Location pour vacances'), nullable=False)
+    date_publication = db.Column(db.Date,nullable=False)
     
     auteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)            # auteur
     localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)               # localisation
@@ -62,23 +64,27 @@ class Announcement(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'titre': self.titre,
             'type': self.type,
             'surface': self.surface,
             'description': self.description,
             'prix': self.prix,
             'adresse': self.adresse,
             'categorie': self.categorie,
+            'date_publication': self.date_publication,
         }
 
     def to_dict_with_relations(self):
         return {
             'id': self.id,
+            'titre': self.titre,
             'type': self.type,
             'surface': self.surface,
             'description': self.description,
             'prix': self.prix,
             'adresse': self.adresse,
             'categorie': self.categorie,
+            'date_publication': self.date_publication,
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
             'photos': [photo.to_dict() for photo in self.photos],

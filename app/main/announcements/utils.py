@@ -67,7 +67,7 @@ def create_announcement():
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"), auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication=request.form.get("date_publication") , auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except:
@@ -130,7 +130,7 @@ def search():
             "message":"Error"
         }),400
         
-    results_query = Announcement.query.filter((Announcement.type.contains(query)) | Announcement.description.contains(query))
+    results_query = Announcement.query.filter((Announcement.titre.contains(query)) | Announcement.description.contains(query))
 
     results = paginate(results_query)
 
