@@ -13,3 +13,7 @@ bp.register_blueprint(pictures_bp, url_prefix="/pictures")
 # Messages
 from app.main.messages.routes import bp as messages_bp
 bp.register_blueprint(messages_bp, url_prefix="/messages")
+
+# Users
+from app.main.users.routes import bp as users_bp
+bp.register_blueprint(users_bp, url_prefix="/users")
