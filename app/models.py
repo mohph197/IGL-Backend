@@ -42,7 +42,7 @@ class User(db.Model):
 class Announcement(db.Model):
     __tablename__ = 'annonce'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    titre = db.Column(db.Text)
+    titre = db.Column(db.Text,nullable=False)
     type = db.Column(db.Text)
     surface = db.Column(db.Float)
     description = db.Column(db.Text)

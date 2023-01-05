@@ -26,3 +26,7 @@ def delete_announcement_route(announcement_id):
 @bp.get("/search")
 def search_route():
     return search()
+
+@bp.get("/filter")
+def filter_route():
+    return filter()

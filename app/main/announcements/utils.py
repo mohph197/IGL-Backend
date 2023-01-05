@@ -4,7 +4,8 @@ from app.main.utils import paginate
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
-from datetime import date
+import datetime
+from sqlalchemy.sql.expression import and_
 
 def index():
     user = get_auth_user()
@@ -68,7 +69,7 @@ def create_announcement():
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= date.today(), auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= datetime.date.today(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except:
@@ -142,3 +143,46 @@ def search():
         "num_pages":results['num_pages'],
         "annonces":[annonce.to_dict() for annonce in results['items']]
     }),200
+
+def filter():
+    try:
+        filter_conditions = []
+        if 'type' in request.args:
+            type = request.args.get('type')
+            filter_conditions.append(Announcement.type.contains(type))
+
+        if 'wilaya' in request.args:
+            wilaya = request.args.get('wilaya')
+            filter_conditions.append(Location.wilaya.contains(wilaya))
+
+        if 'commune' in request.args:
+            commune = request.args.get('commune')
+            filter_conditions.append(Location.commune.contains(commune))
+
+        if 'start_date' in request.args:
+            start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
+            filter_conditions.append(Announcement.date_publication >= start_date)
+
+        if 'end_date' in request.args:
+            end_date = datetime.datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').date()
+            filter_conditions.append(Announcement.date_publication <= end_date)
+        
+        filter_condition = and_(*filter_conditions)
+        results_query = Announcement.query.filter(filter_condition)
+
+        results = paginate(results_query)
+
+        return jsonify({
+            "page":results['page'],
+            "per_page":results['per_page'],
+            "total_count":results['total_count'],
+            "num_pages":results['num_pages'],
+            "annonces":[annonce.to_dict() for annonce in results['items']]
+        }),200
+    except Exception as e:
+        return jsonify(
+            {
+                'error': e.args,
+                'message':'Error',
+            }
+        ),500
