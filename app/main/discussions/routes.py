@@ -13,8 +13,8 @@ def index_received_route():
 
 @bp.get("/sent/<int:discussion_id>")
 def message_sent_route(discussion_id):
-    return message_sent(discussion_id)
+    return discussion_sent(discussion_id)
 
 @bp.get("/received/<int:discussion_id>")
 def message_received_route(discussion_id):
-    return message_received(discussion_id)
+    return discussion_received(discussion_id)

@@ -10,8 +10,9 @@ class User(db.Model):
     role = db.Column(db.String(1), default='U', nullable=False)
 
     annonces_poste = db.relationship('Announcement', backref='auteur', lazy='dynamic')
-    messages_envoyes = db.relationship('Message', backref='emetteur', lazy='dynamic', foreign_keys='Message.emetteur_email')
-    messages_recus = db.relationship('Message', backref='destinataire', lazy='dynamic', foreign_keys='Message.destinataire_email')
+    discussions_annonces = db.relationship('Discussion', backref='annonceur', lazy='dynamic', foreign_keys='Discussion.annonceur_email')
+    discussions_demandees = db.relationship('Discussion', backref='demandeur', lazy='dynamic', foreign_keys='Discussion.demandeur_email')
+    messages_envoyes = db.relationship('Message', backref='emetteur',lazy='dynamic')
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -35,8 +36,8 @@ class User(db.Model):
             'tel': self.tel,
             'role': self.role,
             'annonces_poste': [annonce.to_dict() for annonce in self.annonces_poste],
-            'messages_envoyes': [message.to_dict() for message in self.messages_envoyes],
-            'messages_recus': [message.to_dict() for message in self.messages_recus],
+            'discussions_annonces': [discussion.to_dict() for discussion in self.discussions_annonces],
+            'discussions_demandees': [discussion.to_dict() for discussion in self.discussions_demandees],
         }
 
 class Announcement(db.Model):
@@ -55,7 +56,7 @@ class Announcement(db.Model):
     localisation_id = db.Column(db.Integer, db.ForeignKey('localisation.id'), nullable=False)               # localisation
 
     photos = db.relationship('Picture', backref='annonce', lazy='dynamic')
-    messages = db.relationship('Message', backref='annonce', lazy='dynamic')
+    discussions = db.relationship('Discussion', backref='annonce',lazy='dynamic')
 
     def __repr__(self):
         return f'<Announcement {self.id}>'
@@ -87,7 +88,7 @@ class Announcement(db.Model):
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
             'photos': [photo.to_dict() for photo in self.photos],
-            'messages': [message.to_dict() for message in self.messages]
+            # 'discussions': [discussion.to_dict() for discussion in self.discussions]
         }
 
 class Location(db.Model):
@@ -142,6 +143,36 @@ class Picture(db.Model):
             'annonce': self.annonce.to_dict()
         }
 
+
+class Discussion(db.Model):
+    __tablename__ = 'discussion'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+
+    annonceur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # annonceur
+    demandeur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # demandeur
+    annonce_id = db.Column(db.Integer, db.ForeignKey('annonce.id'), nullable=False)                         # annonce
+
+    messages = db.relationship('Message', backref='discussion', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Discussion {self.id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'annonceur': self.annonceur_email,
+            'demandeur': self.demandeur_email,
+        }
+
+    def to_dict_with_relations(self):
+        return {
+            'id': self.id,
+            'annonceur': self.annonceur.to_dict(),
+            'demandeur': self.demandeur.to_dict(),
+            'annonce': self.annonce.to_dict(),
+            'messages': [message.to_dict() for message in self.messages]
+        }
+
 class Message(db.Model):
     __tablename__ = 'message'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -150,9 +181,8 @@ class Message(db.Model):
     lu = db.Column(db.Boolean, nullable=False)
 
     emetteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # emetteur
-    destinataire_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)      # destinataire
-    annonce_id = db.Column(db.Integer, db.ForeignKey('annonce.id'), nullable=False)                         # annonce
-
+    discussion_id = db.Column(db.Integer, db.ForeignKey('discussion.id'),nullable=False)                    # discussion
+    
     def __repr__(self):
         return f'<Message {self.id}>'
 
@@ -171,6 +201,5 @@ class Message(db.Model):
             'contenu': self.contenu,
             'lu': self.lu,
             'emetteur': self.emetteur.to_dict(),
-            'destinataire': self.destinataire.to_dict(),
-            'annonce': self.annonce.to_dict()
+            'discussion': self.discussion.to_dict()
         }

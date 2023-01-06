@@ -10,9 +10,9 @@ bp.register_blueprint(announcements_bp, url_prefix="/announcements")
 from app.main.pictures.routes import bp as pictures_bp
 bp.register_blueprint(pictures_bp, url_prefix="/pictures")
 
-# Messages
-from app.main.discussions.routes import bp as messages_bp
-bp.register_blueprint(messages_bp, url_prefix="/messages")
+# Discussions
+from app.main.discussions.routes import bp as discussions_bp
+bp.register_blueprint(discussions_bp, url_prefix="/discussions")
 
 # Users
 from app.main.users.routes import bp as users_bp
