@@ -22,22 +22,18 @@ def index():
 def all_announcements():
     try:
         filter_conditions = []
+        #Text Search =================================================
         if 'q' in request.args:
             query = request.args.get('q')
             filter_conditions.append((Announcement.titre.contains(query)) | (Announcement.description.contains(query)))
 
+        #Field Filtering ====================================================
         if 'type' in request.args:
             type = request.args.get('type')
-            filter_conditions.append(Announcement.type.contains(type))
+            if type != 'Autre':
+                filter_conditions.append(Announcement.type.contains(type))
 
-        if 'wilaya' in request.args:
-            wilaya = request.args.get('wilaya')
-            filter_conditions.append(Location.wilaya.contains(wilaya))
-
-        if 'commune' in request.args:
-            commune = request.args.get('commune')
-            filter_conditions.append(Location.commune.contains(commune))
-
+        #Filtering by date =========================================
         if 'start_date' in request.args:
             start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
             filter_conditions.append(Announcement.date_publication >= start_date)
@@ -45,9 +41,27 @@ def all_announcements():
         if 'end_date' in request.args:
             end_date = datetime.datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').date()
             filter_conditions.append(Announcement.date_publication <= end_date)
+
+        #Filtering by price ==============================================
+        if 'start_price' in request.args:
+            start_price = float(request.args.get('start_price'))
+            filter_conditions.append(Announcement.prix >= start_price)
+
+        if 'end_price' in request.args:
+            end_price = float(request.args.get('end_price'))
+            filter_conditions.append(Announcement.prix <= end_price)
         
         filter_condition = and_(*filter_conditions)
         results_query = Announcement.query.filter(filter_condition)
+
+        #Foreign Elements Filtering ===============================
+        if 'wilaya' in request.args:
+            wilaya = request.args.get('wilaya')
+            results_query = results_query.join(Announcement.localisation).filter(Location.wilaya.contains(wilaya))
+
+        if 'commune' in request.args:
+            commune = request.args.get('commune')
+            results_query = results_query.join(Announcement.localisation).filter(Location.commune.contains(commune))
 
         results = paginate(results_query)
 
