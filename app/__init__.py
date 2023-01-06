@@ -8,6 +8,7 @@ import jwt
 
 db = SQLAlchemy()
 socketio = SocketIO()
+connections = {}
 
 def dictify(locals:dict, items:list[str]):
     locals = locals.copy()

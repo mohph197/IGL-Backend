@@ -1,7 +1,7 @@
-from app.main import get_auth_user,get_socket_user
+from app.main import get_auth_user
 from app.models import *
 from flask import jsonify, request
-from app import socketio
+from app import socketio,connections
 from flask_socketio import send
 
 def index_sent():
@@ -60,9 +60,18 @@ def message_received(message_id):
 
     return jsonify(message.to_dict_with_relations()),200
 
+
+#For sending and receiving messages in real-time =========================
+@socketio.on('connect')
+def on_connect():
+    user = get_auth_user()
+    if user:
+        connections[user.email] = request.sid
+
 @socketio.on('message')
-def create_message(data):
-    user = get_socket_user(data.get('token'))
+def create_message(args):
+    user = get_auth_user()
+    data = args.get('data')
     if not user:
         return jsonify({
             "error":"Unauthorized",
@@ -86,20 +95,31 @@ def create_message(data):
         }),404
 
     try:
-        message = Message(
-            objet=data.get("objet"),
-            contenu=data.get("contenu"),
-            lu=False,
-            emetteur_email=user.email,
-            destinataire_email=announcement.auteur_email,
-            annonce_id=announcement_id,
-        )
-        db.session.add(message)
-        db.session.commit()
-        
-        send(message.to_dict_with_relations(),broadcast=True)
-    except Exception as e:
-        print(e)
+        if user.email != announcement.auteur_email:
+            message = Message(
+                objet=data.get("objet"),
+                contenu=data.get("contenu"),
+                lu=False,
+                emetteur_email=user.email,
+                destinataire_email=announcement.auteur_email,
+                annonce_id=announcement_id,
+            )
+            db.session.add(message)
+            db.session.commit()
+            sid = connections.get(message.destinataire_email)
+            if sid:
+                send(message.to_dict_with_relations(),room=sid)
+            else:
+                return jsonify({
+                    "error": "The message recipient is not online",
+                    "message": "Error"
+                }),200
+        else:
+            return jsonify({
+                "error":"Cannot send message to yourself",
+                "message":"Error"
+            }),403
+    except:
         return jsonify({
             "error":"Error while creating message",
             "message":"Error"
