@@ -38,7 +38,7 @@ def announcement(announcement_id):
             "message":"Error"
         }),401
 
-    announcement:Announcement = user.annonces_poste.filter_by(id=announcement_id).first()
+    announcement:Announcement = Announcement.query.filter_by(id=announcement_id).first()
     if not announcement:
         return jsonify({
             "error":"Announcement not found",
