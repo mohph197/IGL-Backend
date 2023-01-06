@@ -18,8 +18,3 @@ def message_sent_route(message_id):
 @bp.get("/received/<int:message_id>")
 def message_received_route(message_id):
     return message_received(message_id)
-
-@bp.post("/create")
-def create_message_route():
-    return create_message()
-

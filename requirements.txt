@@ -13,3 +13,4 @@ python-dotenv
 pyjwt
 flask_cors
 beautifulsoup4
+flask-socketio

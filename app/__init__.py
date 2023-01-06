@@ -3,9 +3,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask_socketio import SocketIO
 import jwt
 
 db = SQLAlchemy()
+socketio = SocketIO()
 
 def dictify(locals:dict, items:list[str]):
     locals = locals.copy()
@@ -31,6 +33,7 @@ def create_app():
     app.config['PAGINATION_PER_PAGE'] = 5
     CORS(app)
     
+    socketio.init_app(app, cors_allowed_origins="*")
     db.init_app(app)
 
     from app.auth.routes import bp as auth_bp

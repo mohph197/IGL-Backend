@@ -61,18 +61,18 @@ def create_announcement():
             location = Location(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"))
             db.session.add(location)
             db.session.commit()
-    except Exception as e:
-        print(e)
+    except:
         return jsonify({
             "error":"Error while creating location",
             "message":"Error"
         }),500
 
     try:
-        announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or None, surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= datetime.date.today(), auteur_email=user.email, localisation_id=location.id)
+        announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or '', surface=request.form.get("surface") or None, description=request.form.get("description") or None, prix=request.form.get("prix"), adresse=request.form.get('adresse'), categorie=request.form.get("categorie"),date_publication= datetime.date.today(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({
             "error":"Error while creating announcement",
             "message":"Error"
@@ -88,8 +88,7 @@ def create_announcement():
             picture = Picture(nom=filename, chemin=filepath, annonce_id=announcement.id)
             db.session.add(picture)
             db.session.commit()
-        except Exception as e:
-            print(e)
+        except:
             return jsonify({
                 "error":"Error while uploading pictures",
                 "message":"Error"

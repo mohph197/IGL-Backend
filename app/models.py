@@ -70,7 +70,7 @@ class Announcement(db.Model):
             'prix': self.prix,
             'adresse': self.adresse,
             'categorie': self.categorie,
-            'date_publication': self.date_publication,
+            'date_publication': self.date_publication.strftime('%Y-%m-%d'),
         }
 
     def to_dict_with_relations(self):
@@ -83,7 +83,7 @@ class Announcement(db.Model):
             'prix': self.prix,
             'adresse': self.adresse,
             'categorie': self.categorie,
-            'date_publication': self.date_publication,
+            'date_publication': self.date_publication.strftime('%Y-%m-%d'),
             'auteur': self.auteur.to_dict(),
             'localisation': self.localisation.to_dict(),
             'photos': [photo.to_dict() for photo in self.photos],
@@ -147,6 +147,7 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     objet = db.Column(db.Text, nullable=False)
     contenu = db.Column(db.Text, nullable=False)
+    lu = db.Column(db.Boolean, nullable=False)
 
     emetteur_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)          # emetteur
     destinataire_email = db.Column(db.String(100), db.ForeignKey('utilisateur.email'), nullable=False)      # destinataire
@@ -160,6 +161,7 @@ class Message(db.Model):
             'id': self.id,
             'objet': self.objet,
             'contenu': self.contenu,
+            'lu': self.lu,
         }
 
     def to_dict_with_relations(self):
@@ -167,6 +169,7 @@ class Message(db.Model):
             'id': self.id,
             'objet': self.objet,
             'contenu': self.contenu,
+            'lu': self.lu,
             'emetteur': self.emetteur.to_dict(),
             'destinataire': self.destinataire.to_dict(),
             'annonce': self.annonce.to_dict()

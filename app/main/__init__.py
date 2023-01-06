@@ -11,3 +11,9 @@ def get_auth_user() -> User:
     if not login_info:
         return None
     return User.query.get(login_info["email"])
+
+def get_socket_user(token) -> User:
+    login_info = login_is_required(token)
+    if not login_info:
+        return None
+    return User.query.get(login_info["email"])
