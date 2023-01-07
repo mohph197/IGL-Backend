@@ -49,6 +49,8 @@ class Announcement(db.Model):
     description = db.Column(db.Text)
     prix = db.Column(db.Float, nullable=False)
     adresse = db.Column(db.Text, nullable=False)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     categorie = db.Column(db.Enum('Vente','Echange','Location','Location pour vacances'), nullable=False)
     date_publication = db.Column(db.Date,nullable=False)
     
@@ -70,6 +72,8 @@ class Announcement(db.Model):
             'description': self.description,
             'prix': self.prix,
             'adresse': self.adresse,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'categorie': self.categorie,
             'date_publication': self.date_publication.strftime('%Y-%m-%d'),
         }
@@ -83,6 +87,8 @@ class Announcement(db.Model):
             'description': self.description,
             'prix': self.prix,
             'adresse': self.adresse,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'categorie': self.categorie,
             'date_publication': self.date_publication.strftime('%Y-%m-%d'),
             'auteur': self.auteur.to_dict(),
