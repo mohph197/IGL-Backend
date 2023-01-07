@@ -57,11 +57,11 @@ def all_announcements():
         #Foreign Elements Filtering ===============================
         if 'wilaya' in request.args:
             wilaya = request.args.get('wilaya')
-            results_query = results_query.join(Announcement.localisation).filter(Location.wilaya.contains(wilaya))
+            results_query = results_query.join(Announcement.localisation).filter(Location.wilaya_name_ascii.contains(wilaya))
 
         if 'commune' in request.args:
             commune = request.args.get('commune')
-            results_query = results_query.join(Announcement.localisation).filter(Location.commune.contains(commune))
+            results_query = results_query.join(Announcement.localisation).filter(Location.commune_name_ascii.contains(commune))
 
         results = paginate(results_query)
 
@@ -106,9 +106,9 @@ def create_announcement():
         }),401
 
     try:
-        location = Location.query.filter_by(wilaya=request.form.get("wilaya"), commune=request.form.get("commune")).first()
+        location = Location.query.filter_by(wilaya_name_ascii=request.form.get("wilaya"), commune_name_ascii=request.form.get("commune")).first()
         if not location:
-            location = Location(wilaya=request.form.get("wilaya"), commune=request.form.get("commune"))
+            location = Location(wilaya_name_ascii=request.form.get("wilaya"), commune_name_ascii=request.form.get("commune"))
             db.session.add(location)
             db.session.commit()
     except:

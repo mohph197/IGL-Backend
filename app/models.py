@@ -94,8 +94,13 @@ class Announcement(db.Model):
 class Location(db.Model):
     __tablename__ = 'localisation'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    wilaya = db.Column(db.String(100), nullable=False)
-    commune = db.Column(db.String(100), nullable=False)
+    commune_name = db.Column(db.String(100))
+    commune_name_ascii = db.Column(db.String(100),nullable=False)
+    daira_name = db.Column(db.String(100))
+    daira_name_ascii = db.Column(db.String(100),nullable=False)
+    wilaya_code = db.Column(db.String(10))
+    wilaya_name = db.Column(db.String(100))
+    wilaya_name_ascii = db.Column(db.String(100),nullable=False)
 
     annonces = db.relationship('Announcement', backref='localisation', lazy='dynamic')
 
@@ -105,15 +110,19 @@ class Location(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'wilaya': self.wilaya,
-            'commune': self.commune,
+            'wilaya': self.wilaya_name_ascii,
+            'wilaya_code': self.wilaya_code,
+            'daira': self.daira_name_ascii,
+            'commune': self.commune_name_ascii,
         }
 
     def to_dict_with_relations(self):
         return {
             'id': self.id,
-            'wilaya': self.wilaya,
-            'commune': self.commune,
+            'wilaya': self.wilaya_name_ascii,
+            'wilaya_code': self.wilaya_code,
+            'daira': self.daira_name_ascii,
+            'commune': self.commune_name_ascii,
             'annonces': [annonce.to_dict() for annonce in self.annonces]
         }
 
