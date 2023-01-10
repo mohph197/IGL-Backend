@@ -87,82 +87,128 @@ def create_message(args):
             "message":"Error"
         }),401
 
-    announcement_id = data.get("announcement_id")
-    if not announcement_id:
-        return jsonify({
-            "error":"Announcement id is required",
-            "message":"Error"
-        }),400
-    if not announcement_id.isdigit():
-        announcement_id = int(announcement_id)
+    print(user.email)
+    discussion_id = data.get('discussion_id')
+    print(discussion_id)
+    if discussion_id:
+        if not discussion_id.isdigit():
+            discussion_id = int(discussion_id)
+        discussion = Discussion.query.get(discussion_id)
+        if discussion:
+            message = Message(
+                objet=data.get("objet"),
+                contenu=data.get("contenu"),
+                lu=False,
+                emetteur_email=user.email,
+                discussion_id=discussion.id,
+            )
 
-    #Check if a previous discussion exists for the announcement
-    discussion:Discussion = Discussion.query.filter(and_(Discussion.annonce_id == announcement_id, (Discussion.annonceur_email == user.email) | (Discussion.demandeur_email == user.email))).first()
-    if discussion:
-        message = Message(
-            objet=data.get("objet"),
-            contenu=data.get("contenu"),
-            lu=False,
-            emetteur_email=user.email,
-            discussion_id=discussion.id,
-        )
+            db.session.add(message)
+            db.session.commit()
 
-        db.session.add(message)
-        db.session.commit()
-
-        sid = connections.get(discussion.demandeur_email if user.email == discussion.annonceur_email else discussion.annonceur_email)
-        if sid:
-            send(message.to_dict_with_relations(),room=sid)
+            sid = connections.get(discussion.demandeur_email if user.email == discussion.annonceur_email else discussion.annonceur_email)
+            if sid:
+                send(message.to_dict_with_relations(),room=sid)
+            else:
+                return jsonify({
+                    "error": "The message recipient is not online",
+                    "message": "Error"
+                }),200
         else:
             return jsonify({
-                "error": "The message recipient is not online",
+                "error": "The discussion doesn't exist",
                 "message": "Error"
             }),200
     else:
-        #Check if the announcement exists
-        announcement:Announcement = Announcement.query.get(announcement_id)
-        if not announcement:
-            return jsonify({
-                "error":"Announcement not found",
-                "message":"Error"
-            }),404
+        announcement_id = data.get("announcement_id")
+        if announcement_id:
+            if not announcement_id.isdigit():
+                announcement_id = int(announcement_id)
 
-        try:
-            if user.email != announcement.auteur_email:
-                discussion = Discussion(
-                    annonce_id = announcement_id,
-                    annonceur_email = announcement.auteur_email,
-                    demandeur_email = user.email,
-                )
-                db.session.add(discussion)
-                db.session.commit()
-                
-                message = Message(
-                    objet=data.get("objet"),
-                    contenu=data.get("contenu"),
-                    lu=False,
-                    emetteur_email=user.email,
-                    discussion_id=discussion.id,
-                )
+            #Check if a previous discussion exists for the announcement
+            discussion:Discussion = Discussion.query.filter(and_(Discussion.annonce_id == announcement_id, Discussion.demandeur_email == user.email)).first()
+            if discussion:
+                try:
+                    if user.email != discussion.annonceur_email:
+                        message = Message(
+                            objet=data.get("objet"),
+                            contenu=data.get("contenu"),
+                            lu=False,
+                            emetteur_email=user.email,
+                            discussion_id=discussion.id,
+                        )
 
-                db.session.add(message)
-                db.session.commit()
+                        db.session.add(message)
+                        db.session.commit()
 
-                sid = connections.get(discussion.annonceur_email)
-                if sid:
-                    send(message.to_dict_with_relations(),room=sid)
-                else:
+                        sid = connections.get(discussion.annonceur_email)
+                        if sid:
+                            send(message.to_dict_with_relations(),room=sid)
+                        else:
+                            return jsonify({
+                                "error": "The message recipient is not online",
+                                "message": "Error"
+                            }),200
+                    else:
+                        return jsonify({
+                            "error":"Cannot send message to yourself",
+                            "message":"Error"
+                        }),403
+                except Exception as e:
                     return jsonify({
-                        "error": "The message recipient is not online",
-                        "message": "Error"
-                    }),200
+                        "error":e.args,
+                        "message":"Error"
+                    }),500
             else:
-                return jsonify({
-                    "error":"Cannot send message to yourself",
-                    "message":"Error"
-                }),403
-        except Exception as e:
+                #Check if the announcement exists
+                announcement:Announcement = Announcement.query.get(announcement_id)
+                if not announcement:
+                    return jsonify({
+                        "error":"Announcement not found",
+                        "message":"Error"
+                    }),404
+
+                try:
+                    if user.email != announcement.auteur_email:
+                        discussion = Discussion(
+                            annonce_id = announcement_id,
+                            annonceur_email = announcement.auteur_email,
+                            demandeur_email = user.email,
+                        )
+                        db.session.add(discussion)
+                        db.session.commit()
+                        
+                        message = Message(
+                            objet=data.get("objet"),
+                            contenu=data.get("contenu"),
+                            lu=False,
+                            emetteur_email=user.email,
+                            discussion_id=discussion.id,
+                        )
+
+                        db.session.add(message)
+                        db.session.commit()
+
+                        sid = connections.get(discussion.annonceur_email)
+                        if sid:
+                            send(message.to_dict_with_relations(),room=sid)
+                        else:
+                            return jsonify({
+                                "error": "The message recipient is not online",
+                                "message": "Error"
+                            }),200
+                    else:
+                        return jsonify({
+                            "error":"Cannot send message to yourself",
+                            "message":"Error"
+                        }),403
+                except Exception as e:
+                    return jsonify({
+                        "error":e.args,
+                        "message":"Error"
+                    }),500
+        else:
             return jsonify({
-                "error":e.args,
+                "error":"Discussion or Announcement id is required",
                 "message":"Error"
             }),500
