@@ -174,3 +174,14 @@ def delete_announcement(announcement_id):
     return jsonify({
         "message":"Announcement deleted successfully"
     }),200
+
+def announcement_messages(announcement_id):
+    annonce:Announcement = Announcement.query.get(announcement_id)
+    if not annonce:
+        return jsonify({
+            "error":"Announcement not found",
+            "message":"Error"
+        }),404
+
+    discussions = annonce.discussions.all()
+    return jsonify([discussion.to_dict_with_relations() for discussion in discussions]),200
