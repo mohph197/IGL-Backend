@@ -183,5 +183,5 @@ def announcement_messages(announcement_id):
             "message":"Error"
         }),404
 
-    discussions = annonce.discussions.all()
-    return jsonify([discussion.to_dict_with_relations() for discussion in discussions]),200
+    discussions: list[Discussion] = annonce.discussions.all()
+    return jsonify([discussion.to_dict() for discussion in discussions]),200
