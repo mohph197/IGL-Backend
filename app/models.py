@@ -207,6 +207,7 @@ class Message(db.Model):
             'objet': self.objet,
             'contenu': self.contenu,
             'lu': self.lu,
+            'emetteur': self.emetteur.to_dict(),
         }
 
     def to_dict_with_relations(self):
