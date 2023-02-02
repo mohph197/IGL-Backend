@@ -11,6 +11,7 @@ Flask-SQLAlchemy
 pymysql
 python-dotenv
 pyjwt
+pytest
 flask_cors
 beautifulsoup4
 flask-socketio

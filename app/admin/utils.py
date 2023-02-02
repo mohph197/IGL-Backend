@@ -23,25 +23,24 @@ def get_infos(link):
     for i in range(min(len(info_labels),len(info_items))):
         label = info_labels[i].get_text()
         info = info_items[i]
-        match label:
-            case "Catégorie":
-                categorie_items = info.find_all("a")
-                announcement.categorie = categorie_items[1].get_text()
-                announcement.type = categorie_items[2].get_text()
-            case "Localisation":
-                localisation_items = info.find_all("a")
-                announcement.wilaya = localisation_items[2].get_text()
-                announcement.commune = localisation_items[3].get_text()
-            case "Adresse":
-                announcement.adresse = info.get_text()
-            case "Surface":
-                announcement.surface = float(info.get_text().replace(' ','').replace('m²',''))
-            case "Prix":
-                announcement.prix = float(info.get_text().replace(' ','').replace('DinarAlgèrien(DA)',''))
-            case "Texte":
-                announcement.description = info.get_text()
-            case "Insérée le":
-                announcement.date_publication = info.get_text().replace('/','-')
+        if label == "Catégorie":
+            categorie_items = info.find_all("a")
+            announcement.categorie = categorie_items[1].get_text()
+            announcement.type = categorie_items[2].get_text()
+        elif label == "Localisation":
+            localisation_items = info.find_all("a")
+            announcement.wilaya = localisation_items[2].get_text()
+            announcement.commune = localisation_items[3].get_text()
+        elif label == "Adresse":
+            announcement.adresse = info.get_text()
+        elif label == "Surface":
+            announcement.surface = float(info.get_text().replace(' ','').replace('m²',''))
+        elif label == "Prix":
+            announcement.prix = float(info.get_text().replace(' ','').replace('DinarAlgèrien(DA)',''))
+        elif label == "Texte":
+            announcement.description = info.get_text()
+        elif label == "Insérée le":
+            announcement.date_publication = info.get_text().replace('/','-')
 
     images = soup.find_all(class_="PhotoMin1")
     announcement.photos = []
