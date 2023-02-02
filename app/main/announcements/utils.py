@@ -31,7 +31,7 @@ def all_announcements():
         if 'type' in request.args:
             type = request.args.get('type')
             if type != 'Autre':
-                filter_conditions.append(Announcement.type.contains(type))
+                filter_conditions.append(Announcement.type == type)
 
         #Filtering by date =========================================
         if 'start_date' in request.args:
@@ -50,10 +50,10 @@ def all_announcements():
         if 'end_price' in request.args:
             end_price = float(request.args.get('end_price'))
             filter_conditions.append(Announcement.prix <= end_price)
-        
-        filter_condition = and_(*filter_conditions)
-        results_query = Announcement.query.filter(filter_condition)
 
+        filter_condition = and_(True, *filter_conditions)
+        results_query = Announcement.query.filter(filter_condition)
+        
         #Foreign Elements Filtering ===============================
         if 'wilaya' in request.args:
             wilaya = request.args.get('wilaya')
@@ -72,6 +72,7 @@ def all_announcements():
             "num_pages":results['num_pages'],
             "annonces":[annonce.to_dict_with_relations() for annonce in results['items']]
         }),200
+
     except Exception as e:
         return jsonify(
             {
