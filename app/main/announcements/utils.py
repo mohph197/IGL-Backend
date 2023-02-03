@@ -7,6 +7,7 @@ import os
 import datetime
 from sqlalchemy.sql.expression import and_
 from sqlalchemy import desc
+import requests
 
 def index():
     user = get_auth_user()
@@ -142,6 +143,73 @@ def create_announcement():
             picture = Picture(nom=filename, chemin=filepath, annonce_id=announcement.id)
             db.session.add(picture)
             db.session.commit()
+        except:
+            return jsonify({
+                "error":"Error while uploading pictures",
+                "message":"Error"
+            }),500
+    db.session.refresh(announcement)
+
+    return jsonify(announcement.to_dict_with_relations()),201
+
+def create_announcement_from_scrapp():
+    user = get_auth_user()
+    if not user:
+        return jsonify({
+            "error":"Unauthorized",
+            "message":"Error"
+        }),401
+    data = request.get_json()
+    try:
+        location = Location.query.filter_by(wilaya_name_ascii=data.get("wilaya"), commune_name_ascii=data.get("commune")).first()
+        if not location:
+            location = Location(wilaya_name_ascii=data.get("wilaya"), commune_name_ascii=data.get("commune"))
+            db.session.add(location)
+            db.session.commit()
+    except:
+        return jsonify({
+            "error":"Error while creating location",
+            "message":"Error"
+        }),500
+
+    try:
+        announcement = Announcement(type=data.get("type") or None,titre=data.get("titre") or '', surface=data.get("surface") or None, description=data.get("description") or None,
+        prix=data.get("prix"), adresse=data.get('adresse'), latitude=data.get('latitude'), longitude=data.get('longitude'),
+        categorie=data.get("categorie"),date_publication= datetime.datetime.strptime(data.get('date_publication'), '%Y-%m-%d').date(), auteur_email=user.email, localisation_id=location.id)
+        db.session.add(announcement)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "error":"Error while creating announcement",
+            "message":"Error"
+        }),500
+
+    cpt = 1
+    for picture in data.get("photos"):
+        try:
+            filedir = os.path.join(os.path.normpath(app.config['UPLOAD_FOLDER']), f'announcement_{announcement.id}')
+            os.makedirs(filedir, exist_ok=True)
+
+            # Download the image
+            response = requests.get(picture)
+
+            # Get the extension info
+            content_type = response.headers.get('content-type')
+            extension = content_type.split('/')[-1]
+
+            # Creating the image file
+            filename = secure_filename(f'image{cpt}.{extension}')
+            filepath = os.path.join(filedir, filename)
+            
+            with open(filepath,"wb") as f:
+                f.write(response.content)
+
+            # Save picture in DB
+            picture = Picture(nom=filename, chemin=filepath, annonce_id=announcement.id)
+            db.session.add(picture)
+            db.session.commit()
+            cpt += 1
         except:
             return jsonify({
                 "error":"Error while uploading pictures",

@@ -19,6 +19,10 @@ def announcement_route(announcement_id):
 def create_announcement_route():
     return create_announcement()
 
+@bp.post("/create-from-scrapp")
+def create_announcement_from_scrapp_route():
+    return create_announcement_from_scrapp()
+
 @bp.delete("/<int:announcement_id>/delete")
 def delete_announcement_route(announcement_id):
     return delete_announcement(announcement_id)
