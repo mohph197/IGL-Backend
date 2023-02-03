@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import concurrent.futures
 from app.admin.models import AnnouncementObj
 from app.admin import annonces_algerie_url,get_auth_admin
+from urllib.parse import urljoin
 
 def get_html(url):
     page = requests.get(url)
@@ -49,6 +50,21 @@ def get_infos(link):
     
     return announcement.to_json()
 
+def get_announcements(url):
+    soup = BeautifulSoup(get_html(url), "html.parser")
+    items = soup.find_all(class_="Tableau1")
+
+    links = []
+    for item in items:
+        link = item.find_all("td")[7].find("a")["href"]
+        links.append(urljoin(annonces_algerie_url, link))
+
+    # This part use multi-threading to optimise execution time
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(get_infos, links))
+
+    return results
+
 def get_online():
     admin = get_auth_admin()
     if admin:
@@ -61,19 +77,11 @@ def get_online():
 
         if len(sys.argv) > 0:
             sub_url += "?rech_page_num="+str(sys.argv[0])
+        else:
+            sub_url += "?rech_page_num="+page
 
         try:
-            soup = BeautifulSoup(get_html(annonces_algerie_url+sub_url), "html.parser")
-            items = soup.find_all(class_="Tableau1")
-
-            links = []
-            for item in items:
-                link = item.find_all("td")[7].find("a")["href"]
-                links.append(annonces_algerie_url+link)
-
-            # This part use multi-threading to optimise execution time
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                results = list(executor.map(get_infos, links))
+            results = get_announcements(urljoin(annonces_algerie_url, sub_url))
             
             return jsonify({
                 'annonces' : results,
