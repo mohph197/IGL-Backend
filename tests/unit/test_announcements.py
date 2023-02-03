@@ -1,5 +1,6 @@
 from flask.testing import FlaskClient
 
+# Testing announcements pagination
 def test_paginate(client: FlaskClient):
     response = client.get('announcements/all')
     result = response.get_json()
@@ -22,6 +23,7 @@ def test_paginate(client: FlaskClient):
     assert result['page'] == result['num_pages']
     assert total_count == result['total_count']
 
+# Testing announcements filters
 def test_filter(client: FlaskClient):
     q = 'villa'
     type = 'Vente'
@@ -50,3 +52,16 @@ def test_filter(client: FlaskClient):
             assert announcement['prix'] <= end_price
             assert wilaya in announcement['localisation']['wilaya']
             assert commune in announcement['localisation']['commune']
+
+# Test announcements scraping
+def test_scraping():
+    from app.admin.utils import get_announcements
+    from app.admin import annonces_algerie_url
+    from urllib.parse import urljoin
+
+    announcements = get_announcements(urljoin(annonces_algerie_url, "AnnoncesImmobilier.asp"))
+
+    assert len(announcements) > 0
+    for announcement in announcements:
+        assert announcement is not None
+        
