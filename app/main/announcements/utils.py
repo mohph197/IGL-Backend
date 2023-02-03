@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 import os
 import datetime
 from sqlalchemy.sql.expression import and_
+from sqlalchemy import desc
 
 def index():
     user = get_auth_user()
@@ -52,7 +53,7 @@ def all_announcements():
             filter_conditions.append(Announcement.prix <= end_price)
 
         filter_condition = and_(True, *filter_conditions)
-        results_query = Announcement.query.filter(filter_condition)
+        results_query = Announcement.query.filter(filter_condition).order_by(desc(Announcement.date_publication))
         
         #Foreign Elements Filtering ===============================
         if 'wilaya' in request.args:

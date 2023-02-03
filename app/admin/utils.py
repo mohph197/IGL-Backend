@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
 from app.admin.models import AnnouncementObj
+from app.models import *
 from app.admin import annonces_algerie_url,get_auth_admin
 from urllib.parse import urljoin
 
@@ -103,3 +104,16 @@ def get_online():
                 'message':'Error',
             }
         ),403
+
+def get_users():
+    admin = get_auth_admin()
+    if not(admin):
+        return jsonify(
+            {
+                'error':'Unauthorized',
+                'message':'Error',
+            }
+        ),403
+    
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users]),200
