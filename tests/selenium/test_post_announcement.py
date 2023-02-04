@@ -26,18 +26,26 @@ def test_post_announcement(driver: webdriver.Chrome, wait: WebDriverWait):
     wait.until(EC.element_to_be_clickable((By.ID, 'route-posted-announcements/create'))).click()
 
     # Fill in form
+    title = 'Test Announcement'
+    price = '100000'
+    surface = '100'
+    address = 'Test Address'
     # Title
-    wait.until(EC.presence_of_element_located((By.ID, 'Titre'))).send_keys('Test Announcement')
+    wait.until(EC.presence_of_element_located((By.ID, 'Titre'))).send_keys(title)
     # Category
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Catégorie-select button'))).click()
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Catégorie-select li:nth-child(1)'))).click()
+    category_choice = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Catégorie-select li:nth-child(1)')))
+    category = category_choice.text
+    category_choice.click()
     # Type
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Type-select button'))).click()
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Type-select li:nth-child(1)'))).click()
+    type_choice = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Type-select li:nth-child(1)')))
+    type = type_choice.text
+    type_choice.click()
     # Price
-    wait.until(EC.presence_of_element_located((By.ID, 'Prix'))).send_keys('100000')
+    wait.until(EC.presence_of_element_located((By.ID, 'Prix'))).send_keys(price)
     # Surface
-    wait.until(EC.presence_of_element_located((By.ID, 'Surface'))).send_keys('100')
+    wait.until(EC.presence_of_element_located((By.ID, 'Surface'))).send_keys(surface)
     # Description
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#description .ql-editor'))).send_keys('This is a test announcement')
     # Pictures
@@ -46,12 +54,17 @@ def test_post_announcement(driver: webdriver.Chrome, wait: WebDriverWait):
     wilaya_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#Wilaya-select button')))
     scroll_element_to_view(wilaya_button)
     wilaya_button.click()
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Wilaya-select li:nth-child(2)'))).click()
+    wilaya_choice = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Wilaya-select li:nth-child(2)')))
+    wilaya = wilaya_choice.text
+    wilaya_choice.click()
     # Commune
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Commune-select button'))).click()
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Commune-select li:nth-child(2)'))).click()
+    commune_choice = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#Commune-select li:nth-child(2)')))
+    commune = commune_choice.text
+    commune_choice.click()
+    location = f'{wilaya}\n{commune}'
     # Address
-    wait.until(EC.presence_of_element_located((By.ID, 'Adresse'))).send_keys('Test Address')
+    wait.until(EC.presence_of_element_located((By.ID, 'Adresse'))).send_keys(address)
     # Map
     scroll_element_to_view(wait.until(EC.presence_of_element_located((By.ID, 'map'))))
     marker_pin = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#map .leaflet-marker-pane img')))
@@ -71,9 +84,16 @@ def test_post_announcement(driver: webdriver.Chrome, wait: WebDriverWait):
     latest_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#announcements-table .rdt_TableBody > div:nth-child(1)')))
     announcement_id = latest_element.get_attribute('id').split('-')[1]
     announcement_title = driver.find_element(By.ID, f'cell-3-{announcement_id}').text
-    announcement_date_str = driver.find_element(By.ID, f'cell-8-{announcement_id}').text
-    announcement_date = datetime.strptime(announcement_date_str, '%a %b %d %Y')
-    # check if title is correct
-    assert announcement_title == 'Test Announcement'
-    # check if date is correct
+    announcement_category = driver.find_element(By.ID, f'cell-4-{announcement_id}').text
+    announcement_surface = driver.find_element(By.ID, f'cell-5-{announcement_id}').text.split(' ')[0]
+    announcement_price = driver.find_element(By.ID, f'cell-6-{announcement_id}').text.split(' ')[0]
+    announcement_location = driver.find_element(By.ID, f'cell-7-{announcement_id}').text
+    announcement_date = datetime.strptime(driver.find_element(By.ID, f'cell-8-{announcement_id}').text, '%a %b %d %Y')
+
+    # Check if information is correct
+    assert announcement_title == title
+    assert announcement_category == category
+    assert announcement_surface == surface
+    assert announcement_price == price
+    assert announcement_location == location
     assert datetime.now().date() == announcement_date.date()
