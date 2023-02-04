@@ -4,7 +4,7 @@ from app.main.utils import paginate
 from flask import jsonify, request, current_app as app
 from werkzeug.utils import secure_filename
 import os
-import datetime
+from datetime import datetime
 from sqlalchemy.sql.expression import and_
 from sqlalchemy import desc
 import requests
@@ -18,7 +18,7 @@ def index():
         }),401
 
     return jsonify(
-        [annonce.to_dict_with_relations() for annonce in user.annonces_poste]
+        [annonce.to_dict_with_relations() for annonce in user.annonces_poste.order_by(desc(Announcement.id)).all()]
     ),200
 
 def all_announcements():
@@ -37,11 +37,11 @@ def all_announcements():
 
         #Filtering by date =========================================
         if 'start_date' in request.args:
-            start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
+            start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
             filter_conditions.append(Announcement.date_publication >= start_date)
 
         if 'end_date' in request.args:
-            end_date = datetime.datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d').date()
             filter_conditions.append(Announcement.date_publication <= end_date)
 
         #Filtering by price ==============================================
@@ -123,7 +123,7 @@ def create_announcement():
     try:
         announcement = Announcement(type=request.form.get("type") or None,titre=request.form.get("titre") or '', surface=request.form.get("surface") or None, description=request.form.get("description") or None,
         prix=request.form.get("prix"), adresse=request.form.get('adresse'), latitude=request.form.get('latitude'), longitude=request.form.get('longitude'),
-        categorie=request.form.get("categorie"),date_publication= datetime.date.today(), auteur_email=user.email, localisation_id=location.id)
+        categorie=request.form.get("categorie"),date_publication=datetime.now().date(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except Exception as e:
@@ -175,7 +175,7 @@ def create_announcement_from_scrapp():
     try:
         announcement = Announcement(type=data.get("type") or None,titre=data.get("titre") or '', surface=data.get("surface") or None, description=data.get("description") or None,
         prix=data.get("prix"), adresse=data.get('adresse'), latitude=data.get('latitude'), longitude=data.get('longitude'),
-        categorie=data.get("categorie"),date_publication= datetime.datetime.strptime(data.get('date_publication'), '%Y-%m-%d').date(), auteur_email=user.email, localisation_id=location.id)
+        categorie=data.get("categorie"),date_publication= datetime.strptime(data.get('date_publication'), '%Y-%m-%d').date(), auteur_email=user.email, localisation_id=location.id)
         db.session.add(announcement)
         db.session.commit()
     except Exception as e:
