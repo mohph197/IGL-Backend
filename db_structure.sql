@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2023 at 08:46 PM
+-- Generation Time: Feb 07, 2023 at 10:38 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.1.12
 
@@ -1671,6 +1671,7 @@ CREATE TABLE `utilisateur` (
 --
 
 INSERT INTO `utilisateur` (`email`, `nom`, `prenom`, `adresse`, `tel`, `role`) VALUES
+('mohtiri718@gmail.com', 'Tirichine', 'Mohammed', NULL, NULL, 'U'),
 ('s_batata@esi.dz', 'Batata', 'Sofiane', NULL, NULL, 'A'),
 ('s_zellagui@esi.dz', 'Zellagui', 'Soumia', NULL, NULL, 'A');
 

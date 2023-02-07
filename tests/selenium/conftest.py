@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 # Setting chrome driver fixture
 @pytest.fixture()
