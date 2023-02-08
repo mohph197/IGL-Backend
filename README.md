@@ -36,7 +36,7 @@ pip install -r requirements.txt
 ## Run The App
 
 ```bash
-flask run
+python run.py
 ```
 
 ## Run Tests

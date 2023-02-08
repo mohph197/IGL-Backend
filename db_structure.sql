@@ -78,7 +78,6 @@ CREATE TABLE `localisation` (
 --
 
 INSERT INTO `localisation` (`id`, `commune_name`, `commune_name_ascii`, `daira_name`, `daira_name_ascii`, `wilaya_code`, `wilaya_name`, `wilaya_name_ascii`) VALUES
-(0, NULL, 'Alger', NULL, NULL, NULL, NULL, 'Alger'),
 (1, 'أدرار', 'Adrar', 'أدرار', 'Adrar', '01', 'أدرار', 'Adrar'),
 (2, 'اقبلي', 'Akabli', 'أولف', 'Aoulef', '01', 'أدرار', 'Adrar'),
 (3, 'أوقروت', 'Aougrout', 'أوقروت', 'Aougrout', '49', 'تيميمون', 'Timimoun'),
