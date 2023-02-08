@@ -236,7 +236,8 @@ def delete_announcement(announcement_id):
 
     # Delete all the photos of annonce
     for photo in annonce.photos.all():
-        os.remove(photo.chemin)
+        if os.path.exists(photo.chemin):
+            os.remove(photo.chemin)
         db.session.delete(photo)
     db.session.delete(annonce)
     db.session.commit()
